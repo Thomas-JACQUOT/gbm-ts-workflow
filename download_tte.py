@@ -11,7 +11,6 @@ from gdt.missions.fermi.time import Time
 def main():
     parser = argparse.ArgumentParser(prog='GBM Targeted Search', \
                                      description='The GBM coherent targeted search')
-    parser.add_argument("--input-path", required=True)
     parser.add_argument("--time", required=True)
     parser.add_argument("--format", required=True, choices=['gps', 'fermi', 'datetime'])
     parser.add_argument("--output", required=True)
@@ -24,7 +23,7 @@ def main():
         value = float(args.time)
     trigger = Time(value, format=args.format)
 
-    path = args.input_path
+    path = args.output
     tte_wildcard = f"{path}/*tte_??_*.fit*"
 
     # check for files
