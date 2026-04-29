@@ -33,7 +33,7 @@ def main():
         tte_files.extend(glob.glob(tte_wildcard.replace("??", det)))
 
     if len(tte_files) < len(det_list):
-        finder =  ContinuousFtp(trigger, protocol="HTTPS")
+        finder =  ContinuousFtp(trigger)
         tte_files = [finder.get_tte(path, dets=[det])[0] for det in det_list]
 
 if __name__ == "__main__":
