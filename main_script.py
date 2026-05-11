@@ -155,9 +155,9 @@ def main():
         submit_dag_file = open("submit_dag_file.dag", "w")
         submit_dag_file.write("JOB A" + " submit_poshist.sub\n")
         submit_dag_file.write("VARS A" + ''' line="''' + str(start_time) + '''"\n''')
-        for i in range(int(len(time_array)/60)):
+        for i in range(int(len(time_list)/60)):
                 submit_dag_file.write("JOB B" + str(i) + " submit_tte.sub\n")
-                submit_dag_file.write("VARS B" + str(i) + ''' line="''' + str(time_array[i*60]) + '''"\n''')
+                submit_dag_file.write("VARS B" + str(i) + ''' line="''' + str(time_list[i*60]) + '''"\n''')
         submit_dag_file.write("JOB C submit_merge.sub\n")
         submit_dag_file.write("JOB D submit_transfer_skymaps.sub\n")
         for i in range(len(fermi_time_array)):
@@ -165,7 +165,7 @@ def main():
                 submit_dag_file.write("VARS TS" + str(i) + ''' line="''' + str(fermi_time_array[i]) + '''"\n''')
         for i in range(len(fermi_time_array)):
                 submit_dag_file.write("PARENT")
-                for j in range(int(len(time_array)/60)):
+                for j in range(int(len(time_list)/60)):
                         submit_dag_file.write(" A" + " B"+ str(j))	
                 submit_dag_file.write(" CHILD TS" + str(i) + "\n")
         for i in range(len(fermi_time_array)):
