@@ -83,7 +83,7 @@ def main():
 
         secours_targeted = open("script_secours_targeted.sh", "w")
         secours_targeted.write("#!/bin/bash\n")
-        secours_targeted.write(targeted_executable + " --time $@" + " --format datetime" + " -o " + targeted_output_path + "\n")
+        secours_targeted.write(targeted_executable + " --time $@" + " --format fermi" + " -o " + targeted_output_path + "\n")
         secours_targeted.write("exit 0")
         secours_targeted.close()
         st = os.stat('script_secours_targeted.sh')
