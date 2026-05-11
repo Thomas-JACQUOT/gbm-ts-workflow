@@ -3,7 +3,6 @@ from argparse import ArgumentParser
 from configparser import ConfigParser
 import datetime
 import os
-import utils
 import stat
 from gdt.missions.fermi.time import Time
 
@@ -36,12 +35,10 @@ def main():
         results = config['results']
         output_path = results["output_path"]
         error_submit_download = os.path.join(output_path, start_time.split("T")[0] + "_" + end_time.split("T")[0])
-        if (os.path.isdir(error_submit_download) == False):
-                os.mkdir(error_submit_download)
+        os.makedirs(error_submit_download, exist_ok=True)
         
         error_submit_download = os.path.join(error_submit_download,  "condor_download_errors")
-        if (os.path.isdir(error_submit_download) == False):
-                os.mkdir(error_submit_download)
+        os.makedirs(error_submit_download, exist_ok=True)
 
 
         submit_download = open("submit_poshist.sub", "w")
