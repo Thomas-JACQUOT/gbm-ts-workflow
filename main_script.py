@@ -10,14 +10,14 @@ def main():
         parser = ArgumentParser(prog='GBM Targeted Search', \
                                 description='The GBM coherent targeted search')
         parser.add_argument('-c', '--config-file', default='config.ini',help='The configuration file')
-        parser.add_argument('-n', '--number-of-searches', default=60, 
-                            help='Number of times in which the targeted search will be ran')
+        parser.add_argument('-t', '--time-interval', default=60, 
+                            help='Time interval in seconds between the Targeted search will run')
         args = parser.parse_args()
 
         # get configuration
         config = ConfigParser()
         config.read(args.config_file)
-        num_searches = args.number_of_searches
+        time_interval = args.time_interval
 
         #download the data
         time_range = config['time_range']
@@ -26,7 +26,7 @@ def main():
         
 
 
-        time_list = np.arange(np.datetime64(start_time), np.datetime64(end_time), num_searches)
+        time_list = np.arange(np.datetime64(start_time), np.datetime64(end_time), time_interval)
         time_list = np.append(time_list, np.datetime64(end_time))
         datetime_array = [datetime.datetime.fromisoformat(f'{time}') for time in time_list]
         time_array = Time(datetime_array, format="datetime")
@@ -102,7 +102,7 @@ def main():
         submit_targeted.write("notification = never\n")
         submit_targeted.write("getEnv     = True\n")
         submit_targeted.write("request_memory = 4096\n")
-        submit_targeted.write("accounting_group = ligo.prod.o4.cbc.grb.gbm_subthreshold\n")
+        #submit_targeted.write("accounting_group = ligo.prod.o4.cbc.grb.gbm_subthreshold\n")
         submit_targeted.write(" \n")
         submit_targeted.write("Queue ")
         submit_targeted.close()
@@ -110,8 +110,7 @@ def main():
         #merge the results
         error_submit_merge = os.path.join(output_path, start_time.split("T")[0] + "_" + end_time.split("T")[0])
         error_submit_merge = os.path.join(error_submit_merge, "condor_merged_errors")
-        if (os.path.isdir(error_submit_merge) == False):
-                os.mkdir(error_submit_merge)
+        os.makedirs(error_submit_merge, exist_ok=True)
 
         submit_merge = open("submit_merge.sub", "w")
         submit_merge.write("Executable = script_merge.py\n")
@@ -124,7 +123,7 @@ def main():
         submit_merge.write("notification = never\n")
         submit_merge.write("getEnv     = True\n")
         submit_merge.write("request_memory = 65536\n")
-        submit_merge.write("accounting_group = ligo.prod.o4.cbc.grb.gbm_subthreshold\n")
+        #submit_merge.write("accounting_group = ligo.prod.o4.cbc.grb.gbm_subthreshold\n")
         submit_merge.write(" \n")
         submit_merge.write("Queue ")
         submit_merge.close()
@@ -145,7 +144,7 @@ def main():
         submit_transfer.write("output     = /dev/null\n")
         submit_transfer.write("notification = never\n")
         submit_transfer.write("getEnv     = True\n")
-        submit_transfer.write("accounting_group = ligo.prod.o4.cbc.grb.gbm_subthreshold\n")
+        #submit_transfer.write("accounting_group = ligo.prod.o4.cbc.grb.gbm_subthreshold\n")
         submit_transfer.write(" \n")
         submit_transfer.write("Queue ")
         submit_transfer.close()
@@ -154,33 +153,29 @@ def main():
 
         #create the dag file
         submit_dag_file = open("submit_dag_file.dag", "w")
-        for i in range(len(time_array)):
-                submit_dag_file.write("JOB A"+ str(i) + " submit_poshist.sub\n")
-                submit_dag_file.write("VARS A" + str(i) + ''' line="''' + str(time_array[i]) + '''"\n''')
-                submit_dag_file.write("JOB B"+ str(i) + " submit_tte.sub\n")
-                submit_dag_file.write("VARS B" + str(i) + ''' line="''' + str(time_array[i]) + '''"\n''')
+        submit_dag_file.write("JOB A" + " submit_poshist.sub\n")
+        submit_dag_file.write("VARS A" + ''' line="''' + str(time_array[0]) + '''"\n''')
+        for i in range(len(time_array)/60):
+                submit_dag_file.write("JOB B" + str(i) + " submit_tte.sub\n")
+                submit_dag_file.write("VARS B" + str(i) + ''' line="''' + str(time_array[i*60]) + '''"\n''')
         submit_dag_file.write("JOB C submit_merge.sub\n")
         submit_dag_file.write("JOB D submit_transfer_skymaps.sub\n")
         for i in range(len(fermi_time_array)):
-                submit_dag_file.write("JOB TS"+ str(i) + " submit_targeted.sub\n")
+                submit_dag_file.write("JOB TS" + str(i) + " submit_targeted.sub\n")
                 submit_dag_file.write("VARS TS" + str(i) + ''' line="''' + str(fermi_time_array[i]) + '''"\n''')
-        for i in range(len(time_array) -1):
-                submit_dag_file.write("PARENT  A"+ str(i) + " CHILD A" + str(i+1) + "\n")
         for i in range(len(fermi_time_array)):
                 submit_dag_file.write("PARENT")
-                for j in range(len(time_array)):
-                        submit_dag_file.write(" A"+ str(j) + " B"+ str(j))	
-                submit_dag_file.write(" CHILD TS"+str(i) + "\n")
+                for j in range(len(time_array)/60):
+                        submit_dag_file.write(" A" + " B"+ str(j))	
+                submit_dag_file.write(" CHILD TS" + str(i) + "\n")
         for i in range(len(fermi_time_array)):
-                submit_dag_file.write("PARENT TS"+str(i) + " CHILD C\n")
+                submit_dag_file.write("PARENT TS" + str(i) + " CHILD C\n")
         submit_dag_file.write("PARENT C CHILD D\n")
         for i in range(len(fermi_time_array)):
-                submit_dag_file.write("RETRY TS"+str(i) + " 3\n")
+                submit_dag_file.write("RETRY TS" + str(i) + " 3\n")
 
 
         submit_dag_file.close()
-        condor_command = "condor_submit_dag submit_dag_file.dag"
-        #os.system(condor_command)
 
 if __name__ == "__main__":
         main()
