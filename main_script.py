@@ -58,7 +58,7 @@ def main():
         submit_download = open("submit_tte.sub", "w")
         submit_download.write("Executable = download_tte.py\n")
         submit_download.write("Universe   = vanilla\n")
-        submit_download.write("Arguments  = --time $(line) --format datetime --output " + output_path + "\n") 
+        submit_download.write("Arguments  = --time $(line) --format datetime --output " + output_path + "$(dir)" + "\n") 
         submit_download.write("input      = /dev/null\n")
         submit_download.write("Log        =" +  error_submit_download  + "/download_condor_tte.log\n")
         submit_download.write("error      =" + error_submit_download + "/download_condor_tte_$(line).err\n")
@@ -83,7 +83,7 @@ def main():
 
         secours_targeted = open("script_secours_targeted.sh", "w")
         secours_targeted.write("#!/bin/bash\n")
-        secours_targeted.write(targeted_executable + " --time $@" + " --format fermi" + " -o " + targeted_output_path + "\n")
+        secours_targeted.write(targeted_executable + " --time $@" + " --format fermi" + " --input-file-path " + " -o " + targeted_output_path + "\n")
         secours_targeted.write("exit 0")
         secours_targeted.close()
         st = os.stat('script_secours_targeted.sh')
@@ -157,7 +157,7 @@ def main():
         submit_dag_file.write("VARS A" + ''' line="''' + str(start_time) + '''"\n''')
         for i in range(int(len(time_list)/60)):
                 submit_dag_file.write("JOB B" + str(i) + " submit_tte.sub\n")
-                submit_dag_file.write("VARS B" + str(i) + ''' line="''' + str(time_list[i*60]) + '''"\n''')
+                submit_dag_file.write("VARS B" + str(i) + ''' line="''' + str(time_list[i*60]) + '''" "dir=''' + str(fermi_time_array[i*60]) + '''"\n''')
         submit_dag_file.write("JOB C submit_merge.sub\n")
         submit_dag_file.write("JOB D submit_transfer_skymaps.sub\n")
         for i in range(len(fermi_time_array)):
