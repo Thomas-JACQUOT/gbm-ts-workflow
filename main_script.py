@@ -83,7 +83,7 @@ def main():
 
         secours_targeted = open("script_secours_targeted.sh", "w")
         secours_targeted.write("#!/bin/bash\n")
-        secours_targeted.write(targeted_executable + " --time $@" + " --format fermi" + " --input-file-path " + " -o " + targeted_output_path + "\n")
+        secours_targeted.write(targeted_executable + " --time $1" + " --format fermi" + " --input-file-path $2" + " -o " + targeted_output_path + "\n")
         secours_targeted.write("exit 0")
         secours_targeted.close()
         st = os.stat('script_secours_targeted.sh')
@@ -94,7 +94,7 @@ def main():
         submit_targeted = open("submit_targeted.sub", "w")
         submit_targeted.write("Executable = script_secours_targeted.sh\n")
         submit_targeted.write("Universe   = vanilla\n")
-        submit_targeted.write("Arguments  = $(line)\n")
+        submit_targeted.write("Arguments  = $(line) $(dir)\n")
         submit_targeted.write("input      = /dev/null\n")
         submit_targeted.write("Log        =" +  error_submit_targeted  + "/targeted_condor.log\n")
         submit_targeted.write("error      =" + error_submit_targeted + "/targeted_condor_$(line).err\n")
@@ -162,7 +162,7 @@ def main():
         submit_dag_file.write("JOB D submit_transfer_skymaps.sub\n")
         for i in range(len(fermi_time_array)):
                 submit_dag_file.write("JOB TS" + str(i) + " submit_targeted.sub\n")
-                submit_dag_file.write("VARS TS" + str(i) + ''' line="''' + str(fermi_time_array[i]) + '''"\n''')
+                submit_dag_file.write("VARS TS" + str(i) + ''' line="''' + str(fermi_time_array[i]) + '''" dir=" ''' + str(fermi_time_array[i*60]) +  '''"\n''')
         for i in range(len(fermi_time_array)):
                 submit_dag_file.write("PARENT")
                 for j in range(int(len(time_list)/60)):
