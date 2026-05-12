@@ -157,7 +157,7 @@ def main():
         submit_dag_file.write("VARS A" + ''' line="''' + str(start_time) + '''"\n''')
         for i in range(int(len(time_list)/60)):
                 submit_dag_file.write("JOB B" + str(i) + " submit_tte.sub\n")
-                submit_dag_file.write("VARS B" + str(i) + ''' line="''' + str(time_list[i*60]) + '''" "dir=''' + str(fermi_time_array[i*60]) + '''"\n''')
+                submit_dag_file.write("VARS B" + str(i) + ''' line="''' + str(time_list[i*60]) + '''" dir="''' + str(fermi_time_array[i*60]) + '''"\n''')
         submit_dag_file.write("JOB C submit_merge.sub\n")
         submit_dag_file.write("JOB D submit_transfer_skymaps.sub\n")
         for i in range(len(fermi_time_array)):
