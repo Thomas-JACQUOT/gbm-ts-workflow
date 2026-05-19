@@ -163,7 +163,7 @@ def main():
         submit_dag_file.write("JOB D submit_transfer_skymaps.sub\n")
         for i in range(len(fermi_time_array)):
                 submit_dag_file.write("JOB TS" + str(i) + " submit_targeted.sub\n")
-                submit_dag_file.write("VARS TS" + str(i) + ''' line="''' + str(fermi_time_array[i]) + '''" dir=" ''' + os.path.join(output_path, str(time_list[int(i/3600)*3600]).split('T')[0], str(time_list[int(i/3600)*3600]).split('T')[1][0:2]) + '''" output=" ''' + os.path.join(output_path, str(time_list[(i/3600)*3600]).split('T')[0], "output_TS",str(time_list[(i/3600)*3600]).split('T')[1].replace(":", "/")) + '''"\n''')
+                submit_dag_file.write("VARS TS" + str(i) + ''' line="''' + str(fermi_time_array[i]) + '''" dir=" ''' + os.path.join(output_path, str(time_list[int(i/3600)*3600]).split('T')[0], str(time_list[int(i/3600)*3600]).split('T')[1][0:2]) + '''" output=" ''' + os.path.join(output_path, str(time_list[int(i/3600)*3600]).split('T')[0], "output_TS",str(time_list[int(i/3600)*3600]).split('T')[1].replace(":", "/")) + '''"\n''')
         for i in range(len(fermi_time_array)):
                 submit_dag_file.write("PARENT")
                 for j in range(int(len(time_list)/60)):
