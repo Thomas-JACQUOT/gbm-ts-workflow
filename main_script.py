@@ -44,7 +44,7 @@ def main():
         submit_download = open("submit_poshist.sub", "w")
         submit_download.write("Executable = download_poshist.py\n")
         submit_download.write("Universe   = vanilla\n")
-        submit_download.write("Arguments  = --time $(line) --format datetime --output " + output_path + "\n")
+        submit_download.write("Arguments  = --time $(line) --format datetime --output $(dir)" + "\n")
         submit_download.write("input      = /dev/null\n")
         submit_download.write("Log        =" +  error_submit_download  + "/download_condor_poshist.log\n")
         submit_download.write("error      =" + error_submit_download + "/download_condor_poshist_$(line).err\n")
@@ -83,7 +83,7 @@ def main():
 
         secours_targeted = open("script_secours_targeted.sh", "w")
         secours_targeted.write("#!/bin/bash\n")
-        secours_targeted.write(targeted_executable + " --time $1" + " --format fermi" + " --input-file-path $2" + " -o " + targeted_output_path + "\n")
+        secours_targeted.write(targeted_executable + " --time $1" + " --format fermi" + " --input-file-path $2" + " -o $3" + "\n")
         secours_targeted.write("exit 0")
         secours_targeted.close()
         st = os.stat('script_secours_targeted.sh')
@@ -94,7 +94,7 @@ def main():
         submit_targeted = open("submit_targeted.sub", "w")
         submit_targeted.write("Executable = script_secours_targeted.sh\n")
         submit_targeted.write("Universe   = vanilla\n")
-        submit_targeted.write("Arguments  = $(line) $(dir)\n")
+        submit_targeted.write("Arguments  = $(line) $(dir) $(output)\n")
         submit_targeted.write("input      = /dev/null\n")
         submit_targeted.write("Log        =" +  error_submit_targeted  + "/targeted_condor.log\n")
         submit_targeted.write("error      =" + error_submit_targeted + "/targeted_condor_$(line).err\n")
@@ -153,16 +153,17 @@ def main():
 
         #create the dag file
         submit_dag_file = open("submit_dag_file.dag", "w")
-        submit_dag_file.write("JOB A" + " submit_poshist.sub\n")
-        submit_dag_file.write("VARS A" + ''' line="''' + str(start_time) + '''"\n''')
+        for i in range(int(len(time_list)/3600)):
+                submit_dag_file.write("JOB A" + " submit_poshist.sub\n")
+                submit_dag_file.write("VARS A" + ''' line="''' + str(time_list[i*3600]) + '''" dir="''' + output_path + str(time_list[i*3600]).split('T')[0] + '''"\n''')
         for i in range(int(len(time_list)/60)):
                 submit_dag_file.write("JOB B" + str(i) + " submit_tte.sub\n")
-                submit_dag_file.write("VARS B" + str(i) + ''' line="''' + str(time_list[i*60]) + '''" dir="''' + str(fermi_time_array[i*60]) + '''"\n''')
+                submit_dag_file.write("VARS B" + str(i) + ''' line="''' + str(time_list[i*60]) + '''" dir="''' + os.path.join(output_path, str(time_list[int(i/60)*3600]).split('T')[0], str(time_list[int(i/60)*3600]).split('T')[1][0:2]) + '''"\n''')
         submit_dag_file.write("JOB C submit_merge.sub\n")
         submit_dag_file.write("JOB D submit_transfer_skymaps.sub\n")
         for i in range(len(fermi_time_array)):
                 submit_dag_file.write("JOB TS" + str(i) + " submit_targeted.sub\n")
-                submit_dag_file.write("VARS TS" + str(i) + ''' line="''' + str(fermi_time_array[i]) + '''" dir=" ''' + output_path + str(fermi_time_array[int(i/60)*60]) +  '''"\n''')
+                submit_dag_file.write("VARS TS" + str(i) + ''' line="''' + str(fermi_time_array[i]) + '''" dir=" ''' + os.path.join(output_path, str(time_list[int(i/3600)*3600]).split('T')[0], str(time_list[int(i/3600)*3600]).split('T')[1][0:2]) + '''" output=" ''' + os.path.join(output_path, str(time_list[i*3600]).split('T')[0], "output_TS",str(time_list[i*3600]).split('T')[1].replace(":", "/")) + '''"\n''')
         for i in range(len(fermi_time_array)):
                 submit_dag_file.write("PARENT")
                 for j in range(int(len(time_list)/60)):
