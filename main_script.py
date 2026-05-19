@@ -158,12 +158,12 @@ def main():
                 submit_dag_file.write("VARS A" + str(i) + ''' line="''' + str(time_list[i*1440]) + '''" dir="''' + output_path + str(time_list[i*1440]).split('T')[0] + '''"\n''')
         for i in range(int(len(time_list)/60)):
                 submit_dag_file.write("JOB B" + str(i) + " submit_tte.sub\n")
-                submit_dag_file.write("VARS B" + str(i) + ''' line="''' + str(time_list[i*60]) + '''" dir="''' + os.path.join(output_path, str(time_list[int(i/24)*1440]).split('T')[0], str(time_list[int(i/24)*1440]).split('T')[1][0:2]) + '''"\n''')
+                submit_dag_file.write("VARS B" + str(i) + ''' line="''' + str(time_list[i*60]) + '''" dir="''' + os.path.join(output_path, str(time_list[int(i/24)*1440]).split('T')[0], str(time_list[i]).split('T')[1][0:2]) + '''"\n''')
         submit_dag_file.write("JOB C submit_merge.sub\n")
         submit_dag_file.write("JOB D submit_transfer_skymaps.sub\n")
         for i in range(len(fermi_time_array)):
                 submit_dag_file.write("JOB TS" + str(i) + " submit_targeted.sub\n")
-                submit_dag_file.write("VARS TS" + str(i) + ''' line="''' + str(fermi_time_array[i]) + '''" dir=" ''' + os.path.join(output_path, str(time_list[int(i/1440)*1440]).split('T')[0], str(time_list[int(i/1440)*1440]).split('T')[1][0:2]) + '''" output=" ''' + os.path.join(output_path, str(time_list[int(i/1440)*1440]).split('T')[0], "output_TS",str(time_list[int(i/1440)*1440]).split('T')[1].replace(":", "/")) + '''"\n''')
+                submit_dag_file.write("VARS TS" + str(i) + ''' line="''' + str(fermi_time_array[i]) + '''" dir=" ''' + os.path.join(output_path, str(time_list[int(i/24)*1440]).split('T')[0], str(time_list[i]).split('T')[1][0:2]) + '''" output=" ''' + os.path.join(output_path, str(time_list[int(i/1440)*1440]).split('T')[0], "output_TS",str(time_list[i]).split('T')[1].replace(":", "/")) + '''"\n''')
         for i in range(len(fermi_time_array)):
                 submit_dag_file.write("PARENT")
                 for j in range(int(len(time_list)/60)):
