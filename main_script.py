@@ -154,8 +154,8 @@ def main():
         #create the dag file
         submit_dag_file = open("submit_dag_file.dag", "w")
         for i in range(int(len(time_list)/3600)):
-                submit_dag_file.write("JOB A" + " submit_poshist.sub\n")
-                submit_dag_file.write("VARS A" + ''' line="''' + str(time_list[i*3600]) + '''" dir="''' + output_path + str(time_list[i*3600]).split('T')[0] + '''"\n''')
+                submit_dag_file.write("JOB A" + str(i) + " submit_poshist.sub\n")
+                submit_dag_file.write("VARS A" + str(i) + ''' line="''' + str(time_list[i*3600]) + '''" dir="''' + output_path + str(time_list[i*3600]).split('T')[0] + '''"\n''')
         for i in range(int(len(time_list)/60)):
                 submit_dag_file.write("JOB B" + str(i) + " submit_tte.sub\n")
                 submit_dag_file.write("VARS B" + str(i) + ''' line="''' + str(time_list[i*60]) + '''" dir="''' + os.path.join(output_path, str(time_list[int(i/60)*3600]).split('T')[0], str(time_list[int(i/60)*3600]).split('T')[1][0:2]) + '''"\n''')
