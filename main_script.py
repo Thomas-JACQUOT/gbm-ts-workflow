@@ -167,7 +167,7 @@ def main():
         for i in range(len(fermi_time_array)):
                 submit_dag_file.write("PARENT")
                 for j in range(int(len(time_list)/60)):
-                        submit_dag_file.write(" A" + " B"+ str(j))	
+                        submit_dag_file.write(" A" + str(int(j/60) + " B"+ str(j))	
                 submit_dag_file.write(" CHILD TS" + str(i) + "\n")
         for i in range(len(fermi_time_array)):
                 submit_dag_file.write("PARENT TS" + str(i) + " CHILD C\n")
