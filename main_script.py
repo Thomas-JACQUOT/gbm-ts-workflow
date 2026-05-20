@@ -158,7 +158,7 @@ def main():
                 submit_dag_file.write("VARS A" + str(i) + ''' line="''' + str(time_list[i*1440]) + '''" dir="''' + os.path.join(str(time_list[i*1440]).split('T')[0], 'poshist_cspec') + '''"\n''')
                 submit_dag_file.write("CATEGORY A" + str(i) + " download\n")
                 submit_dag_file.write("JOB B" + str(i) + " submit_tte.sub\n")
-                submit_dag_file.write("VARS B" + str(i) + ''' line="''' + str(time_list[i*60]) + '''" dir="''' + os.path.join(str(time_list[i*1440]).split('T')[0], 'tte') + '''"\n''')
+                submit_dag_file.write("VARS B" + str(i) + ''' line="''' + str(time_list[i*1440]) + '''" dir="''' + os.path.join(str(time_list[i*1440]).split('T')[0], 'tte') + '''"\n''')
                 submit_dag_file.write("CATEGORY B" + str(i) + " download\n")                
         submit_dag_file.write("JOB C submit_merge.sub\n")
         submit_dag_file.write("JOB D submit_transfer_skymaps.sub\n")
