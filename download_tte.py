@@ -34,7 +34,7 @@ def main():
 
     if len(tte_files) < len(det_list):
         finder =  ContinuousFtp(trigger)
-        tte_files = [finder.get_tte(path, dets=[det])[0] for det in det_list]
+        tte_files = [finder.get_tte(path, dets=[det], full_day=True)[0] for det in det_list]
 
 if __name__ == "__main__":
     main()
