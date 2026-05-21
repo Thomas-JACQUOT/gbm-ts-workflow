@@ -176,7 +176,7 @@ def main():
         submit_dag_file.write("PARENT C CHILD D\n")
         for i in range(len(fermi_time_array)):
                 submit_dag_file.write("RETRY TS" + str(i) + " 3\n")
-        submit_dag_file.write("MAXJOBS download 30\n")
+        submit_dag_file.write("MAXJOBS download 10\n")
 
 
         submit_dag_file.close()
