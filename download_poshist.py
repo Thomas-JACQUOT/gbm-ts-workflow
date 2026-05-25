@@ -15,17 +15,21 @@ if __name__ == "__main__":
     parser.add_argument("--output", required=True)
     args = parser.parse_args()
 
-if args.format == 'datetime':
-    value = datetime.datetime.fromisoformat(args.time)
-    print(value)
-else:
-    value = float(args.time)
-trigger = Time(value, format=args.format)
+    if args.format == 'datetime':
+        start_value = datetime.datetime.fromisoformat(args.start_time)
+        end_value = datetime.datetime.fromisoformat(args.end_time)
+    else:
+        start_value = float(args.start_time)
+        end_value = float(args.end_time)
+        start_trigger = Time(start_value, format=args.format)
+        end_trigger = Time(end_value, format=args.format)
+        triggers = np.arange(start_trigger, end_trigger, 86400)
 
-GRB_FERMI_TIME = trigger.fermi
-#download the poshist file
-os.makedirs(f"{args.output}", exist_ok=True)
-trigger_id = Time(f"{GRB_FERMI_TIME}", format='fermi')
-ftp = ContinuousFtp(trigger_id)
-ftp.get_cspec(f"{args.output}")
-ftp.get_poshist(f"{args.output}")
+    # check for files
+    tte_files = []
+    for trigger in triggers:
+        path = os.path.join(args.output, str(trigger).split('T')[0], 'poshist_cspec')
+        tte_wildcard = f"{path}/*tte_??_*.fit*"
+        finder =  ContinuousFtp(trigger)
+        finder.get_cspec(path)
+        finder.get_poshist(path)

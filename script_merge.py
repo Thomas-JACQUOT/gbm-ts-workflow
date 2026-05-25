@@ -59,54 +59,39 @@ live_time.coalesce()
 
 with h5py.File(output_file_full, 'w') as of:
         ds = of.create_dataset('livetime', data = live_time)
-        dtype = [('met', '<f8'),
-                 ('duration', '<f8'),
-                 ('in_gti', '<i'),
-                 ('rock', '<i'),
-                 ('good', '<i'),
-                 ('best_loc_sc_phi', '<f8'),
-                 ('best_loc_sc_theta', '<f8'),
-                 ('best_loc_cel_phi', '<f8'),
-                 ('best_loc_cel_theta', '<f8'),
-                 ('best_spec', '<i'),
-                 ('ampli', '<f8'),
-                 ('snr', '<f8'),
+        dtype = [('time_ref', '<f8'),
+                 ('template_names', '<f8'),
+                 ('tstart', '<i'),
+                 ('duration', '<i'),
+                 ('az', '<i'),
+                 ('zen', '<f8'),
+                 ('like_status', '<i'),
+                 ('like_snr', '<f8'),
+                 ('template', '<i'),
+                 ('flux_amplitude', '<f8'),
+                 ('reduced_chisq', '<f8'),
+                 ('chiplusdof', '<f8'),
+                 ('loglr', '<f8'),
                  ('snr0', '<f8'),
                  ('snr1', '<f8'),
-                 ('chisq', '<f8'),
-                 ('chisq+', '<f8'),
+                 ('pe0', '<f8'),
+                 ('pe1', '<f8'),
+                 ('pe2', '<f8'),
+                 ('in_rock', '<i'),
+                 ('marginal_flux0', '<f8'),
+                 ('marginal_flux1', '<f8'),
+                 ('marginal_flux2', '<f8'),
+                 ('marginal_flux_sig0', '<f8'),
+                 ('marginal_flux_sig1', '<f8'),
+                 ('marginal_flux_sig2', '<f8'),
+                 ('ra', '<f8'),
+                 ('dec', '<f8'),
                  ('sun_angle', '<f8'),
                  ('earth_angle', '<f8'),
-                 ('llr', '<f8'),
-                 ('coinc_llr', '<f8'),
-                 ('cr_var0', '<f8'),
-                 ('cr_var1', '<f8'),
-                 ('cr_var2', '<f8')]
+                 ('in_gti', '<i')]
         ds = of.create_dataset('gbmscan', (odata_full.shape[0],), dtype)
-        ds['met'] = odata_full[:,0]
-        ds['duration'] = odata_full[:,1]
-        ds['in_gti'] = odata_full[:,2]
-        ds['rock'] = odata_full[:,3]
-        ds['good'] = odata_full[:,4]
-        ds['best_loc_sc_phi'] = odata_full[:,5]
-        ds['best_loc_sc_theta'] = odata_full[:,6]
-        ds['best_loc_cel_phi'] = odata_full[:,7]
-        ds['best_loc_cel_theta'] = odata_full[:,8]
-        ds['best_spec'] = odata_full[:,9]
-        ds['ampli'] = odata_full[:,10]
-        ds['snr'] = odata_full[:,11]
-        ds['snr0'] = odata_full[:,12]
-        ds['snr1'] = odata_full[:,13]
-        ds['chisq'] = odata_full[:,14]
-        ds['chisq+'] = odata_full[:,15]
-        ds['sun_angle'] = odata_full[:,16]
-        ds['earth_angle'] = odata_full[:,17]
-        ds['llr'] = odata_full[:,18]
-        ds['coinc_llr'] = odata_full[:,19]
-        ds['cr_var0'] = odata_full[:,20]
-        ds['cr_var1'] = odata_full[:,21]
-        ds['cr_var2'] = odata_full[:,22]
-
+        for i in range(len(dtype)):
+                ds[f'{dtype[i]}'] = odata_full[:,i]
 
 output_file_filtered = os.path.join(output_path, "merged_filtered_results.hdf")
 
