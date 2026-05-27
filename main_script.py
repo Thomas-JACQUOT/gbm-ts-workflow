@@ -94,7 +94,7 @@ def main():
         submit_targeted = open("submit_targeted.sub", "w")
         submit_targeted.write("Executable = script_secours_targeted.sh\n")
         submit_targeted.write("Universe   = vanilla\n")
-        submit_targeted.write("Arguments  = $(time) $(input-path) $(output-path)\n")
+        submit_targeted.write("Arguments  = $(time) $(inputpath) $(outputpath)\n")
         submit_targeted.write("input      = /dev/null\n")
         submit_targeted.write("Log        =" +  error_submit_targeted  + "/targeted_condor.log\n")
         submit_targeted.write("error      =" + error_submit_targeted + "/targeted_condor_$(time).err\n")
@@ -165,7 +165,7 @@ def main():
         submit_dag_file.write("JOB D submit_transfer_skymaps.sub\n")
         for i in range(len(fermi_time_array)):
                 submit_dag_file.write("JOB TS" + str(i) + " submit_targeted.sub\n")
-                submit_dag_file.write("VARS TS" + str(i) + ''' time="''' + str(fermi_time_array[i]) + '''" input-path="''' + os.path.join(output_path, str(time_list[int(i/1440)*1440]).split('T')[0]) + '''" output-path="''' + os.path.join(output_path, "output_TS", str(time_list[int(i/1440)*1440]).split('T')[0], str(time_list[i]).split('T')[1].replace(":", "/")) + '''"\n''')
+                submit_dag_file.write("VARS TS" + str(i) + ''' time="''' + str(fermi_time_array[i]) + '''" inputpath="''' + os.path.join(output_path, str(time_list[int(i/1440)*1440]).split('T')[0]) + '''" outputpath="''' + os.path.join(output_path, "output_TS", str(time_list[int(i/1440)*1440]).split('T')[0], str(time_list[i]).split('T')[1].replace(":", "/")) + '''"\n''')
         for i in range(len(fermi_time_array)):
                 submit_dag_file.write("PARENT")
                 for j in range(int(len(time_list)/1440)):
