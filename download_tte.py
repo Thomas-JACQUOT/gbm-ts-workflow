@@ -1,4 +1,4 @@
-#!/home/thomas-jacquot/.conda/envs/up2dategts/bin/python
+#!/opt/up2dategts/bin/python
 import numpy as np
 import os
 import glob
@@ -17,16 +17,7 @@ def main():
     parser.add_argument("--output", required=True)
     args = parser.parse_args()
 
-    if args.format == 'datetime':
-        start_value = datetime.datetime.fromisoformat(args.start_time)
-        end_value = datetime.datetime.fromisoformat(args.end_time)
-    else:
-        start_value = float(args.start_time)
-        end_value = float(args.end_time)
-    start_trigger = Time(start_value, format=args.format)
-    end_trigger = Time(end_value, format=args.format)
-    triggers = np.arange(start_trigger, end_trigger, 86400)
-
+    triggers = np.arange(np.datetime64(args.start_time), np.datetime64(args.end_time), 86400)
     # check for files
     tte_files = []
     for trigger in triggers:
@@ -35,7 +26,9 @@ def main():
         det_list = np.array(["n0", "n1", "n2", "n3", "n4", "n5", "n6", "n7", "n8", "n9", "na", "nb", "b0", "b1"])
         for det in det_list:
             tte_files.extend(glob.glob(tte_wildcard.replace("??", det)))
-        finder =  ContinuousFtp(trigger)
+        datetime_trigger = datetime.datetime.fromisoformat(str(trigger))
+        time_trigger = Time(datetime_trigger, format="datetime")
+        finder =  ContinuousFtp(time_trigger)
         tte_files = [finder.get_tte(path, dets=[det], full_day=True)[0] for det in det_list]
 
 if __name__ == "__main__":
