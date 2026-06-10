@@ -1,0 +1,44 @@
+Bootstrap: docker
+From: igwn/base:el8
+
+%labels
+    Author thomas.jacquot@ligo.org
+    Description GBM Targeted Search environment
+
+%environment
+    export VIRTUAL_ENV=up2dategts
+    export PATH=/opt/up2dategts/bin:$PATH
+%post
+    dnf install -y \
+        git \
+        vim \
+	python3.11 \
+	python3.11-pip \
+	python3.11-devel
+
+    alternatives --set python /usr/bin/python3.11
+
+    python3 -m venv /opt/up2dategts
+
+    . /opt/up2dategts/bin/activate
+
+    python -m pip install --upgrade pip setuptools wheel
+
+    cd /opt
+    git clone -b GBM-TTE-sim https://github.com/Thomas-JACQUOT/gamma-ray-targeted-search.git
+
+    cd gamma-ray-targeted-search
+
+    pip install -r requirements.txt
+
+    pip install h5py
+%runscript
+    . /opt/up2dategts/bin/activate
+
+%test
+    /opt/up2dategts/bin/python --version
+    /opt/up2dategts/bin/pip list
+    /opt/up2dategts/bin/python -c "
+import gdt
+print('gdt import successful')
+"
