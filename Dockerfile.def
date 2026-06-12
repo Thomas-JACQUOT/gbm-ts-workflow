@@ -1,5 +1,5 @@
 Bootstrap: docker
-From: igwn/base:el8
+From: debian:trixie
 
 %labels
     Author thomas.jacquot@ligo.org
@@ -9,23 +9,20 @@ From: igwn/base:el8
     export VIRTUAL_ENV=up2dategts
     export PATH=/opt/up2dategts/bin:$PATH
 %post
-    dnf install -y \
+    apt update -y
+    apt install -y\
         git \
-        vim \
-	python3.11 \
-	python3.11-pip \
-	python3.11-devel
-
-    alternatives --set python /usr/bin/python3.11
+	python3 \
+	python3-venv
 
     python3 -m venv /opt/up2dategts
 
     . /opt/up2dategts/bin/activate
 
-    python -m pip install --upgrade pip setuptools wheel
+    python3 -m pip install --upgrade pip setuptools wheel
 
     cd /opt
-    git clone -b GBM-TTE-sim https://github.com/Thomas-JACQUOT/gamma-ray-targeted-search.git
+    git clone -b GBM-TTE-sim --filter=blob:none --depth=1 https://github.com/Thomas-JACQUOT/gamma-ray-targeted-search.git
 
     cd gamma-ray-targeted-search
 
