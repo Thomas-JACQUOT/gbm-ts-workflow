@@ -17,7 +17,7 @@ From: debian:trixie
 
     python3 -m venv /opt/up2dategts
 
-    . /opt/up2dategts/bin/activate
+    source /opt/up2dategts/bin/activate
 
     python3 -m pip install --upgrade pip setuptools wheel
 
@@ -30,7 +30,7 @@ From: debian:trixie
 
     pip install h5py
 %runscript
-    . /opt/up2dategts/bin/activate
+    source /opt/up2dategts/bin/activate
 
 %test
     /opt/up2dategts/bin/python --version
