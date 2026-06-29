@@ -12,9 +12,14 @@ From: debian:trixie
     apt update -y
     apt install -y\
         git \
-	python3 \
-	python3-venv
+        CMake \
+        gcc \
+        perl>5.6 \
+        cfitsio \
+	    python3 \
+	    python3-venv
 
+    #curl http://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio_latest.tar.gz
     python3 -m venv /opt/up2dategts
 
     source /opt/up2dategts/bin/activate
