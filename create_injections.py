@@ -116,7 +116,7 @@ def main():
         print(gw_sample)
         with h5py.File(f"{gw_sample}", 'r') as hf:
             for key in samples.keys():
-                samples['luminosity'] = samplers['injs'].sample_luminosity(samples['l0'], hf['cbc_waveform_params/inclination'][:10000], samples['opening_angle'], samples['mass1'], samples['mass2'])
+                samples['luminosity'] = samplers['injs'].sample_luminosity(samples['l0'], hf['cbc_waveform_params/inclination'][:10000], samples['opening_angle'], hf['cbc_waveform_params/mass1_det'][:10000], hf['cbc_waveform_params/mass2_det'][:10000])
                 plt.hist(samples["luminosity"], density=True, bins=50, label="Luminosity distribution")
                 plt.legend()
                 plt.show()
