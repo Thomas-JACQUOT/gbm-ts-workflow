@@ -63,6 +63,11 @@ class InjectionSampler:
                 high = float(cfg["max"])
             return np.random.uniform(low, high, size)
 
+        if ptype == "uniform-log":
+            low = float(cfg["min"])
+            high = float(cfg["max"])
+            return np.exp(np.random.uniform(np.log(low), np.log(high), size))
+
         elif ptype == "gaussian":
             mean = float(cfg["mean"])
             sigma = np.sqrt(float(cfg["var"]))
@@ -89,7 +94,7 @@ class InjectionSampler:
     def sample_luminosity(self, amp, inclination, opening_angle, mass1, mass2):
         l_theta = np.exp((-1/2) * (inclination/opening_angle)**2) ##From Salafia et al. 2023 https://doi.org/10.1051/0004-6361/202347298
         l_mass = np.exp((-1/2) * (mass1/mass2)**2)
-        return amp * l_theta * l_mass
+        return amp * (l_theta + l_mass)
 
 def main():
     parser = ArgumentParser(prog='GBM Targeted Search', \
@@ -100,26 +105,115 @@ def main():
 
     args = parser.parse_args()
     ini_files = args.config_files
-    gw_sample_path = glob.glob(f"{args.input_sample_directory}/samples*")
+    gw_sample_path = (glob.glob(f"{args.input_sample_directory}/samples*"))
+    gw_samples = {
+        'mass1_det': np.array([]),
+        'mass2_det': np.array([]),
+        'inclination': np.array([]),
+        'ra': np.array([]),
+        'dec': np.array([])
+    }
+    for gw_sample in gw_sample_path:
+        print(gw_sample)
+        with h5py.File(f"{gw_sample}", 'r') as hf:
+            gw_samples['mass1_det'] = np.append(gw_samples['mass1_det'],hf['cbc_waveform_params/mass1_det'][:])
+            gw_samples['mass2_det'] = np.append(gw_samples['mass2_det'],hf['cbc_waveform_params/mass2_det'][:])
+            gw_samples['inclination'] = np.append(gw_samples['inclination'],hf['cbc_waveform_params/inclination'][:])
+            gw_samples['ra'] = np.append(gw_samples['ra'],hf['cbc_waveform_params/ra'][:])
+            gw_samples['dec'] = np.append(gw_samples['dec'],hf['cbc_waveform_params/dec'][:])
+    with open("BrowseTargets-4023665-1784559849.txt", 'r') as f:
+        lines = f.readlines()[3:]
+        alpha_list, beta_list = [], []
+        for line in lines:
+            alpha, beta = (line.split("|")[:][1]), (line.split("|")[:][2])
+            if "e" in alpha:
+                alpha_list.append(float(alpha))
+                beta_list.append(float(beta))
+            else:
+                pass
+    plt.hist(alpha_list, density=True, bins=100, label="alpha query distribution")
+    #plt.xlim(-3,1)
+    plt.title('Alpha dists without x lim')
+    plt.legend()
+    plt.savefig("Alpha_distribution_no_x_lim.png")
+    plt.close()
+    plt.hist(beta_list, density=True, bins=100, label="beta query distribution")
+    #plt.xlim(-3,1)
+    plt.title('beta dists without x lim')
+    plt.legend()
+    plt.savefig("Beta.png")
+    plt.close()
     samplers = {}
     for ini in ini_files:
          samplers[ini[0:4]] = InjectionSampler(ini)
     samples = {}
     for sampler in samplers:
             for key in samplers[sampler].priors.keys():
-                samples[key] = samplers[sampler].sample_prior(f'{key}') 
-                plt.hist(samples[key], density=True, bins=50, label=f"{key} distribution")
+                samples[key] = samplers[sampler].sample_prior(f'{key}', size=len(gw_samples['mass1_det']/1000)) 
+                plt.hist(samples[key], density=True, bins=1000, label=f"{key} distribution")
                 plt.title(f"{sampler} {samplers[sampler].priors[key]}")
                 plt.legend()
-                plt.show()
-    for gw_sample in gw_sample_path:
-        print(gw_sample)
-        with h5py.File(f"{gw_sample}", 'r') as hf:
-            for key in samples.keys():
-                samples['luminosity'] = samplers['injs'].sample_luminosity(samples['l0'], hf['cbc_waveform_params/inclination'][:10000], samples['opening_angle'], hf['cbc_waveform_params/mass1_det'][:10000], hf['cbc_waveform_params/mass2_det'][:10000])
-                plt.hist(samples["luminosity"], density=True, bins=50, label="Luminosity distribution")
-                plt.legend()
-                plt.show()
+                plt.savefig(f"{key}_distribution.png")
+                plt.close()
+    
+    samples['luminosity'] = samplers['injs'].sample_luminosity(samples['l0'], gw_samples['inclination'][:len(gw_samples['mass1_det']/1000)], samples['opening_angle'], gw_samples['mass1_det'][:len(gw_samples['mass1_det']/1000)], gw_samples['mass2_det'][:len(gw_samples['mass1_det']/1000)])
+    plt.hist(samples["luminosity"], density=True, bins=1000, label="Luminosity distribution")
+    plt.xscale("log")
+    plt.legend()
+    plt.savefig("luminosity_distribution")
+    plt.close()
+    plt.scatter(samples['luminosity'], samples['epeak'])
+    plt.title("Luminosity vs epeak")
+    plt.savefig('Luminosity_vs_epeak.png')
+    plt.close()
+    plt.hist(gw_samples['mass2_det'][:]/gw_samples['mass1_det'][:], density=True, bins=100)
+    plt.title("m2/m1")
+    plt.savefig("m2_m1.png")
+    plt.close()
+    plt.hist(gw_samples['mass1_det'][:], density=True, bins=100)
+    plt.title("m1")
+    plt.savefig("m1.png")
+    plt.close()
+    plt.hist(gw_samples['mass1_det'][:], density=True, bins=100)
+    plt.title("m2")
+    plt.savefig("m2.png")
+    plt.close()
+    plt.hist(gw_samples['inclination'][:], density=True, bins=1000)
+    plt.xscale("log")
+    plt.title("iota")
+    plt.savefig("iota.png")
+    plt.close()
+    plt.hist(gw_samples['inclination'][:]/samples['opening_angle'], density=True, bins=1000)
+    plt.xscale("log")
+    plt.title("iota/theta_v")
+    plt.savefig("iota_theta_v.png")
+    plt.close()
+    plt.hist(samples['l0'], density=True, bins=1000, label="L0 distribution")
+    plt.xscale('log')
+    plt.title('L0_dist')
+    plt.legend()
+    plt.savefig("L0_distribution.png")
+    plt.close()
+    plt.hist(samples['alpha'], density=True, bins=1000, label="alpha git distribution")
+    plt.hist(alpha_list, density=True, bins=1000, label="alpha paper distribution")
+    #plt.xlim(-3,1)
+    plt.title('Alpha dists without x lim')
+    plt.legend()
+    plt.savefig("Alpha_distributions_no_x_lim.png")
+    plt.close()
+    plt.hist(samples['beta'], density=True, bins=1000, label="beta git distribution")
+    plt.hist(beta_list, density=True, bins=1000, label="beta paper distribution")
+    #plt.xlim(-5, -1)
+    plt.title('Beta dists without x lim ')
+    plt.legend()
+    plt.savefig("Beta_distributions_no_x_lim.png")
+    plt.close()
+    with h5py.File("EM_samples.hdf",'w') as emf:
+        for key in samples.keys():
+            print(key)
+            emf.create_dataset(key, data=samples[f'{key}'])
+        emf.create_dataset("ra", data=gw_samples['ra'])
+        emf.create_dataset("dec", data=gw_samples['dec'])
                 #hf.create_dataset(key, data=samples[key])
 
     

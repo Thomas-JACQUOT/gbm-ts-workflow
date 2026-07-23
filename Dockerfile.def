@@ -16,17 +16,27 @@ From: debian:trixie
         cmake \
         gfortran \
         libcfitsio-dev \
-        perl \
-        cpanminus \
         pkg-config \
         ca-certificates \
-        wget \
+        perl \
+        curl \
 	    python3 \
 	    python3-venv
 
-    #curl http://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio_latest.tar.gz
-    #cpanm Astro::FITS::CFITSIO 
+    #Instructions to install response generator
+    apt install -y libastro-fits-cfitsio-perl
+    curl --output gbmrsp-2.0.10.tar.bz2 https://fermi.gsfc.nasa.gov/ssc/data/analysis/gbm/gbmrsp-2.0.10.tar.bz2 
+    tar xvjf gbmrsp-2.0.10.tar.bz2
+    cd gbmrsp-2.0
+    mkdir build
+    cd build
+    cmake ../src
+    make
+    make install
+    
+    cd 
 
+    #Creation of the virtual env
     python3 -m venv /opt/up2dategts
 
     . /opt/up2dategts/bin/activate
